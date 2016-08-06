@@ -1,0 +1,14 @@
+{
+  "name": "commute-analyzer",
+  "version": "0.1.0",
+  "description": "Commute analyzer",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server"
+  },
+  "author": "Ian Nicholas",
+  "license": "ISC",
+  "dependencies": {
+
+  }
+}
