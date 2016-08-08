@@ -1,4 +1,4 @@
-import private from './private';
+import pvt from './private';
 
 window.init = function() {
 	var directionsService = new google.maps.DirectionsService;
@@ -16,6 +16,6 @@ window.init = function() {
 
 document.addEventListener('DOMContentLoaded', function() {
 	var gmScript = document.createElement('script');
-	gmScript.src = 'https://maps.googleapis.com/maps/api/js?key=' + private.clientKey + '&callback=init';
+	gmScript.src = 'https://maps.googleapis.com/maps/api/js?key=' + pvt.clientKey + '&callback=init';
 	document.body.appendChild(gmScript);
 });

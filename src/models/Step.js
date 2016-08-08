@@ -11,6 +11,9 @@ module.exports = (function() {
 			},
 			duration: {
 				type: 'integer'
+			},
+			coords: {
+				type: 'varchar'
 			}
 		}
 	};

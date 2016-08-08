@@ -1,5 +1,5 @@
 var axios = require('axios');
-var keys = require('./private');
+var pvt = require('./private');
 var db = require('./db/db');
 
 var Route = require('./models/Route');
@@ -16,7 +16,7 @@ var routePromise = db.insert(Route, 'Route', [routePayload]);
 
 axios.get('https://maps.googleapis.com/maps/api/directions/json', {
 		params: {
-			key: keys.serverKey,
+			key: pvt.serverKey,
 			origin: '25 Pearl St., Portland, ME',
 			destination: '354 Brown Road, Pownal, ME'
 		}
@@ -43,7 +43,8 @@ axios.get('https://maps.googleapis.com/maps/api/directions/json', {
 					return {
 						trip: tripId,
 						index: index,
-						duration: step.duration.value
+						duration: step.duration.value,
+						coords: JSON.stringify(step.start_location) + JSON.stringify(step.end_location)
 					};
 				});
 				db.insert(Step, 'Step', stepPayload).catch(function(error) {
