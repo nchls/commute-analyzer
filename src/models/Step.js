@@ -1,14 +1,17 @@
-export const Step = () {
+module.exports = (function() {
 	return {
-		routeInstance: {
-			type: 'varchar',
-			foreignModel: 'RouteInstance'
-		},
-		index: {
-			type: 'smallint'
-		},
-		duration: {
-			type: 'smallint'
+		name: 'Step',
+		schema: {
+			trip: {
+				type: 'integer',
+				foreignModel: 'Trip'
+			},
+			index: {
+				type: 'smallint'
+			},
+			duration: {
+				type: 'integer'
+			}
 		}
 	};
-};
+}());
