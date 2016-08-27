@@ -62,9 +62,9 @@ getDefault = function(field) {
 		} else {
 			return 'FALSE';
 		}
-	} else if (field.type === 'timestamp') {
+	} else if (field.type.startsWith('timestamp')) {
 		if (field.default === 'now') {
-			return "(now() at time zone 'utc')";
+			return "(now() at time zone 'America/New_York')";
 		}
 	}
 	return field.default;

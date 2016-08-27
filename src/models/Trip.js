@@ -7,7 +7,7 @@ module.exports = (function() {
 				foreignModel: 'Route'
 			},
 			time: {
-				type: 'timestamp',
+				type: 'timestamp with time zone',
 				default: 'now'
 			},
 			destinationType: { // 'home' or 'office'
