@@ -18,7 +18,6 @@ var runInsertOrUpdate = function(model, rows) {
 		var results = [];
 
 		rows.forEach(function(row) {
-			console.log(row.sql, row.parameters);
 			client.query(row.sql, row.parameters, function(err, result) {
 				if (err) {
 					deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
@@ -44,7 +43,8 @@ query = function(model, table, columns, criteria) {
 
 	pg.connect(conString, function(err, client, done) {
 		if (err) {
-			deferred.reject('Error fetching client from pool', err);
+			console.error(err);
+			return deferred.reject('Error fetching client from pool', err);
 		}
 
 		var whereClause;
@@ -61,14 +61,14 @@ query = function(model, table, columns, criteria) {
 
 		var sql = 'select ' + columns.join(',') + ' from "' + table + '"' + whereClause;
 
-		console.log(sql, parameters);
 		client.query(sql, parameters, function(err, result) {
 			done();
 			if (err) {
-				deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
+				console.error(err);
+				return deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
 			} else {
 				result = formatPgData(model, result);
-				deferred.resolve(result);
+				return deferred.resolve(result);
 			}
 		});
 

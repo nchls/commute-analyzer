@@ -7,6 +7,8 @@ var Route = require('./models/Route');
 var Trip = require('./models/Trip');
 var Step = require('./models/Step');
 
+var VERBOSE = false;
+
 var TIMEZONE = 'America/New_York';
 
 var isMorning;
@@ -25,10 +27,12 @@ function init() {
 		routesPromise.then(function(routes) {
 			routes.rows.forEach(mapRoute);
 		}).catch(function(error) {
-			console.error('Routes query failed!', error);
+			logError('Routes query failed!', error);
 		});
 	} else {
-		console.log('The time is not currently within commute windows.');
+		if (VERBOSE) {
+			log('The time is not currently within commute windows.');
+		}
 	}
 }
 
@@ -63,7 +67,7 @@ function mapRoute(route) {
 				var mappedRoute = response.data.routes[0];
 				var warnings = mappedRoute.warnings;
 				if (warnings.length) {
-					console.log('warnings!', warnings);
+					log('warnings!', warnings);
 				}
 				var trip = mappedRoute.legs[0];
 				var steps = trip.steps;
@@ -76,6 +80,7 @@ function mapRoute(route) {
 
 				tripPromise.then(function(tripResult) {
 					var tripId = tripResult[0].rows[0].id;
+					log('Inserted new trip ID', tripId);
 					var stepPayload = steps.map(function(step, index) {
 						return {
 							trip: tripId,
@@ -84,15 +89,22 @@ function mapRoute(route) {
 							coords: JSON.stringify(step.start_location) + JSON.stringify(step.end_location)
 						};
 					});
-					db.insert(Step, 'Step', stepPayload).catch(function(error) {
-						console.error('Step insert failed!', error);
-					});
+					db.insert(Step, 'Step', stepPayload)
+						.then(function(stepResult) {
+							if (VERBOSE) {
+								log('Inserted new step IDs', stepResult.map(function(result) {
+									return result.rows[0].id;
+								}));
+							}
+						}).catch(function(error) {
+							logError('Step insert failed!', error);
+						});
 				}).catch(function(error) {
-					console.error('Trip insert failed!', error);
+					logError('Trip insert failed!', error);
 				});
 			})
 			.catch(function(error) {
-				console.error('error!', error);
+				logError('Google Maps API call error!', error);
 			});
 	}
 }
@@ -118,9 +130,17 @@ function isInEveningCommuteWindow(momentInstance) {
 		second: 0
 	});
 	var eveningEnd = moment().tz(TIMEZONE).set({
-		hour: 9 + 12,
+		hour: 7 + 12,
 		minute: 30,
 		second: 0
 	});
 	return momentInstance.isBetween(eveningStart, eveningEnd, null, '[]')
 }
+
+function log() {
+	console.log('[' + moment().format() + '] ', Array.prototype.slice.call(arguments));
+}
+function logError() {
+	console.error('[' + moment().format() + '] ', Array.prototype.slice.call(arguments));
+}
+
