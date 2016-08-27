@@ -14,13 +14,13 @@ module.exports = (function() {
 					maxLength: 40
 				}
 			},
-			origin: {
+			home: {
 				type: 'varchar',
 				validation: {
 					maxLength: 200
 				}
 			},
-			destination: {
+			office: {
 				type: 'varchar',
 				validation: {
 					maxLength: 200

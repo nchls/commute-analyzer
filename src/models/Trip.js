@@ -9,6 +9,12 @@ module.exports = (function() {
 			time: {
 				type: 'timestamp',
 				default: 'now'
+			},
+			destinationType: { // 'home' or 'office'
+				type: 'varchar',
+				validation: {
+					maxLength: 10
+				}
 			}
 		}
 	};

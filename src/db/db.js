@@ -6,7 +6,7 @@ var private = require('../private');
 
 var conString = 'postgres://' + private.db.user + ':' + private.db.pass + '@' + private.db.host + '/' + private.db.name;
 
-var query = function(model, rows) {
+var runInsertOrUpdate = function(model, rows) {
 	var deferred = q.defer();
 
 	pg.connect(conString, function(err, client, done) {
@@ -39,12 +39,50 @@ var query = function(model, rows) {
 	return deferred.promise;
 },
 
+query = function(model, table, columns, criteria) {
+	var deferred = q.defer();
+
+	pg.connect(conString, function(err, client, done) {
+		if (err) {
+			deferred.reject('Error fetching client from pool', err);
+		}
+
+		var whereClause;
+		var parameters;
+		if (criteria !== undefined) {
+			whereClause = objToSetOrWhereClause(criteria, 'where');
+			var parameterizedWhereClause = parameterizeClauses([whereClause]);
+			whereClause = ' where ' + parameterizedWhereClause[0];
+			parameters = parameterizedWhereClause[1];
+		} else {
+			whereClause = '';
+			parameters = [];
+		}
+
+		var sql = 'select ' + columns.join(',') + ' from "' + table + '"' + whereClause;
+
+		console.log(sql, parameters);
+		client.query(sql, parameters, function(err, result) {
+			done();
+			if (err) {
+				deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
+			} else {
+				result = formatPgData(model, result);
+				deferred.resolve(result);
+			}
+		});
+
+	});
+
+	return deferred.promise;
+}
+
 insert = function(model, table, rows) {
 	var formattedRows = rows.map(function(row) {
 		return getInsertSQL(table, row);
 	});
 
-	return query(model, formattedRows);
+	return runInsertOrUpdate(model, formattedRows);
 },
 
 getInsertSQL = function(table, row) {
@@ -76,7 +114,7 @@ update = function(model, table, criteria, obj) {
 
 	sql = 'update "' + table + '" set ' + setClause + ' where ' + whereClause + ';';
 
-	return query(model, sql, parameters);
+	return runInsertOrUpdate(model, sql, parameters);
 },
 
 objToValuesClause = function(obj) {
@@ -172,7 +210,7 @@ formatPgData = function(model, data) {
 				if (propSchema) {
 					if (propSchema.type === 'numeric') {
 						newVal = parseFloat(val);
-					} else if (_.contains(['int', 'smallint'], propSchema.type)) {
+					} else if (_.includes(['int', 'smallint'], propSchema.type)) {
 						newVal = parseInt(val, 10);
 					} else if (propSchema.type === 'date' && val !== null) {
 						newVal = val.toISOString().split('T')[0];
