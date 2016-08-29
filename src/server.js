@@ -1,30 +1,36 @@
-const hapi = require('hapi');
-const socketIo = require('socket.io');
+var hapi = require('hapi');
 
-const server = new hapi.Server();
+var api = require('./api');
+
+var server = new hapi.Server();
 
 server.connection({
-	port: 29090
+	port: 8081
 });
 
-const io = socketIo(server.listener, {serveClient: false});
-
-io.on('connection', function(socket) {
-	socket.emit('oh hi!');
-	socket.on('burp', function() {
-		socket.emit('excuse you');
-	});
-});
-
-/*
 server.route({
 	method: 'GET',
 	path: '/',
 	handler: function(request, reply) {
-		reply('route to api');
+		api.getRoutes().then(function(routeResponse) {
+			reply(routeResponse);
+		}).catch(function(error) {
+			reply(error);
+		});
 	}
 });
-*/
+
+server.route({
+	method: 'GET',
+	path: '/pownal',
+	handler: function(request, reply) {
+		api.getRoute('pownal').then(function(routeResponse) {
+			reply(routeResponse);
+		}).catch(function(error) {
+			reply(error);
+		});
+	}
+});
 
 server.start(function() {
 	console.log('Server running at:', server.info.uri);

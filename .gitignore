@@ -1,5 +1,6 @@
 private.js
 bin/
+dist/
 
 # Logs
 logs

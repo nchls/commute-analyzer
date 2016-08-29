@@ -11,7 +11,7 @@ var runInsertOrUpdate = function(model, rows) {
 
 	pg.connect(conString, function(err, client, done) {
 		if (err) {
-			deferred.reject('Error fetching client from pool', err);
+			return deferred.reject('Error fetching client from pool', err);
 		}
 
 		var rowsCount = rows.length;
