@@ -6,10 +6,7 @@ module.exports = React.createClass({
 	},
 	render: function() {
 		return <div>
-			<h1>Commute Analyzer</h1>
-			<div>
-				{this.props.children}
-			</div>
+			index page
 		</div>;
 	}
 });

@@ -12,7 +12,7 @@ module.exports = {
 	},
 	plugins: [
 		new htmlPlugin({
-			template: 'app.html'
+			template: 'app.html',
 		})
 	],
 	devtool: 'sourcemap',

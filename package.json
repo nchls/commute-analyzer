@@ -18,7 +18,8 @@
     "pg": "^6.0.3",
     "q": "^1.4.1",
     "react": "^15.3.1",
-    "react-dom": "^15.3.1"
+    "react-dom": "^15.3.1",
+    "react-router": "^2.7.0"
   },
   "devDependencies": {
     "babel-core": "^6.13.2",
