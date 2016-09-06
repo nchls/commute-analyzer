@@ -11,7 +11,7 @@ var BaseStep = require('./models/BaseStep');
 var Step = require('./models/Step');
 
 var SECONDS_TO_GET_IN_YOUR_CAR_AND_START_DRIVING = 90;
-var VERBOSE = true;
+var VERBOSE = false;
 
 var TIMEZONE = 'America/New_York';
 
