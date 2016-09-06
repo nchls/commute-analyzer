@@ -1,14 +1,16 @@
 var _ = require('lodash');
 
 var Route = require('../models/Route');
+var BaseTrip = require('../models/BaseTrip');
 var Trip = require('../models/Trip');
+var BaseStep = require('../models/BaseStep');
 var Step = require('../models/Step');
 
 
 init = function() {
 	var output = '';
 	
-	_.forEach([Route, Trip, Step], function(model) {
+	_.forEach([Route, BaseTrip, Trip, BaseStep, Step], function(model) {
 		output += getSQL(model) + '\n';
 	})
 

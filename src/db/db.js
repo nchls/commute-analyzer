@@ -38,6 +38,27 @@ var runInsertOrUpdate = function(model, rows) {
 	return deferred.promise;
 },
 
+rawQuery = function(sql, parameters) {
+	return new Promise(function(resolve, reject) {
+		pg.connect(conString, function(err, client, done) {
+			if (err) {
+				return reject('Error fetching client from pool', err);
+			}
+			client.query(sql, parameters, function(err, result) {
+				done();
+				if (err) {
+					console.log('err', err, 'result', result);
+					return reject(err);
+				}
+				resolve(result);
+			}).catch(function(error) {
+				done();
+				reject(error);
+			});
+		});
+	});
+};
+
 query = function(model, table, columns, criteria) {
 	var deferred = q.defer();
 
@@ -229,6 +250,7 @@ formatPgData = function(model, data) {
 
 module.exports = {
 	query: query,
+	rawQuery: rawQuery,
 	insert: insert,
 	update: update
 };

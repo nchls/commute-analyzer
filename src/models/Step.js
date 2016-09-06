@@ -6,14 +6,12 @@ module.exports = (function() {
 				type: 'integer',
 				foreignModel: 'Trip'
 			},
-			index: {
-				type: 'smallint'
-			},
 			duration: {
 				type: 'integer'
 			},
-			coords: {
-				type: 'varchar'
+			baseStep: {
+				type: 'integer',
+				foreignModel: 'BaseStep'
 			}
 		}
 	};

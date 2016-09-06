@@ -1,13 +1,16 @@
 var axios = require('axios');
 var moment = require('moment-timezone');
+var _ = require('lodash');
 
 var pvt = require('./private');
 var db = require('./db/db');
 var Route = require('./models/Route');
+var BaseTrip = require('./models/BaseTrip');
 var Trip = require('./models/Trip');
+var BaseStep = require('./models/BaseStep');
 var Step = require('./models/Step');
 
-var VERBOSE = false;
+var VERBOSE = true;
 
 var TIMEZONE = 'America/New_York';
 
@@ -17,17 +20,29 @@ var isEvening;
 init();
 
 function init() {
-	var now = moment().tz(TIMEZONE);
+	var now = moment().tz(TIMEZONE),
+		destinationType;
+	if (isInMorningCommuteWindow(now)) {
+		destinationType = 'office';
+	} else if (isInEveningCommuteWindow(now)) {
+		destinationType = 'home';
+	}
 
-	isMorning = isInMorningCommuteWindow(now);
-	isEvening = isInEveningCommuteWindow(now);
-
-	if (isMorning || isEvening) {
-		var routesPromise = getRoutes();
-		routesPromise.then(function(routes) {
-			routes.rows.forEach(mapRoute);
+	if (destinationType !== undefined) {
+		getRoutesAndBaseSteps(destinationType).then(function(routesAndBaseSteps) {
+			_.forEach(routesAndBaseSteps, function(baseSteps, routeId) {
+				createTrip(routeId, destinationType).then(function(tripResult) {
+					mapStep(tripResult[0].rows[0].id, baseSteps, new Date().getTime()).then(function(stepResult) {
+						console.log('Steps mapped correctly', stepResult);
+					}).catch(function(error) {
+						logError('Error in step mapping', error);
+					});
+				}).catch(function(error) {
+					logError('Error in trip creation', error);
+				});
+			});
 		}).catch(function(error) {
-			logError('Routes query failed!', error);
+			logError('Error in retrieving routes and base steps', error);
 		});
 	} else {
 		if (VERBOSE) {
@@ -36,8 +51,41 @@ function init() {
 	}
 }
 
-function getRoutes() {
-	return db.query(Route, 'Route', ['*']);
+function getRoutesAndBaseSteps(destinationType) {
+	var sql = [
+		'select "Route".id as "routeId", "BaseStep".index, "BaseStep"."startLat", "BaseStep"."startLon", "BaseStep"."endLat", "BaseStep"."endLon"',
+		'from "Route", "BaseTrip", "BaseStep"',
+		'where "BaseTrip"."destinationType" = $1',
+		'and "BaseTrip".route = "Route".id',
+		'and "BaseStep".trip = "BaseTrip".id',
+		'order by "BaseStep".index asc'
+	].join(' ');
+
+	return new Promise(function(resolve, reject) {		
+		db.rawQuery(sql, [destinationType]).then(function(result) {
+			var output = _.groupBy(result.rows, 'routeId');
+			console.log('output', output);
+			resolve(output);
+		}).catch(function(error) {
+			reject(error);
+		});
+	});
+}
+
+function createTrip(routeId, destinationType) {
+	var tripPayload = {
+		route: routeId,
+		destinationType: destinationType
+	};
+	console.log(tripPayload);
+	return db.insert(Trip, 'Trip', [tripPayload]);
+}
+
+function mapStep(tripId, steps, timestamp) {
+	return new Promise(function(resolve, reject) {
+		var step = steps.shift();
+
+	});
 }
 
 function mapRoute(route) {
@@ -110,6 +158,7 @@ function mapRoute(route) {
 }
 
 function isInMorningCommuteWindow(momentInstance) {
+	return true;
 	var morningStart = moment().tz(TIMEZONE).set({
 		hour: 5,
 		minute: 0,
