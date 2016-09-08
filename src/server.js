@@ -8,6 +8,14 @@ server.connection({
 	port: 8081
 });
 
+var routeView = function(request, reply) {
+	api.getRoute('pownal').then(function(routeResponse) {
+		reply(routeResponse);
+	}).catch(function(error) {
+		reply(error);
+	});
+};
+
 server.route({
 	method: 'GET',
 	path: '/',
@@ -23,13 +31,13 @@ server.route({
 server.route({
 	method: 'GET',
 	path: '/pownal',
-	handler: function(request, reply) {
-		api.getRoute('pownal').then(function(routeResponse) {
-			reply(routeResponse);
-		}).catch(function(error) {
-			reply(error);
-		});
-	}
+	handler: routeView
+});
+
+server.route({
+	method: 'GET',
+	path: '/commute-api/{p*}',
+	handler: routeView
 });
 
 server.start(function() {

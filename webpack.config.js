@@ -8,13 +8,21 @@ module.exports = {
 	entry: path.join(__dirname, 'src', 'app.js'),
 	output: {
 		path: path.join(__dirname, 'dist'),
-		filename: 'bundle.js'
+		filename: '/bundle.js'
 	},
 	plugins: [
 		new htmlPlugin({
 			template: 'app.html',
 		})
 	],
+	devServer: {
+		proxy: {
+			'/commute-api/*': {
+				target: 'http://127.0.0.1:8081',
+				secure: false
+			}
+		}
+	},
 	devtool: 'sourcemap',
 	module: {
 		loaders: [

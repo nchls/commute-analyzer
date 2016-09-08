@@ -21,6 +21,47 @@ var getRoutes = function() {
 
 var getRoute = function(slug) {
 	return new Promise(function(resolve, reject) {
+
+		var sql = `
+			select "Trip".time, "Step".duration from "Step", "BaseStep", "BaseTrip", "Trip", "Route"
+			where "Route".slug = $1
+			and "Trip".route = "Route".id
+			and "BaseStep".trip = "BaseTrip".id
+			and "Step"."baseStep" = "BaseStep".id
+			and "BaseTrip"."destinationType" = $2
+			and "Step".trip = "Trip".id
+			order by "Trip".time asc, "BaseStep".index asc
+		`;
+
+		db.rawQuery(sql, ['pownal', 'home']).then(function(result) {
+			var tripTimesAdded = [];
+			var output = [];
+			result.rows.forEach(function(row) {
+				var timeIso = row.time.toISOString();
+				if (tripTimesAdded.indexOf(timeIso) === -1) {
+					tripTimesAdded.push(timeIso);
+					output.push({
+						time: timeIso,
+						durations: [],
+						sum: 0
+					});
+				}
+				output[output.length-1].durations.push(row.duration);
+				output[output.length-1].sum += row.duration;
+			});
+			resolve(output);
+		}).catch(function(error) {
+			reject(error);
+		});
+
+
+
+
+
+
+
+
+			/*
 		pg.connect(conString, function(err, client, done) {
 			if (err) {
 				return reject('Error fetching client from pool', err);
@@ -64,6 +105,9 @@ var getRoute = function(slug) {
 				reject(error);
 			});
 		});
+
+		*/
+
 	});
 };
 
