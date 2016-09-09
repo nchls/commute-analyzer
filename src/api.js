@@ -30,10 +30,11 @@ var getRoute = function(slug) {
 			and "Step"."baseStep" = "BaseStep".id
 			and "BaseTrip"."destinationType" = $2
 			and "Step".trip = "Trip".id
+			and cast("Trip".time as date) = $3
 			order by "Trip".time asc, "BaseStep".index asc
 		`;
 
-		db.rawQuery(sql, ['pownal', 'home']).then(function(result) {
+		db.rawQuery(sql, ['pownal', 'home', '2016-09-08']).then(function(result) {
 			var tripTimesAdded = [];
 			var output = [];
 			result.rows.forEach(function(row) {
@@ -51,6 +52,7 @@ var getRoute = function(slug) {
 			});
 			resolve(output);
 		}).catch(function(error) {
+			console.error(error);
 			reject(error);
 		});
 
