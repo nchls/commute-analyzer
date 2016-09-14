@@ -112,7 +112,7 @@ function mapStep(tripId, steps, timestamp) {
 				duration: duration
 			}];
 			db.insert(Step, 'Step', stepPayload).then(function() {
-				mapStep(tripId, steps, timestamp + duration).then(resolve).catch(function(error) {
+				mapStep(tripId, steps, timestamp).then(resolve).catch(function(error) {
 					reject(error);
 				});
 			}).catch(function(error) {
