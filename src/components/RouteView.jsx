@@ -15,25 +15,44 @@ module.exports = React.createClass({
 		}.bind(this));
 	},
 
+	getMaxDuration: function() {
+		let maxDuration = 0;
+		this.state.trips.forEach((trip) => {
+			const totalDuration = trip.durations.reduce((prev, curr) => prev + curr);
+			if (totalDuration > maxDuration) {
+				maxDuration = totalDuration;
+			}
+		});
+		return maxDuration;
+	},
+
 	render: function() {
 		const self = this;
-		return <div>
+
+		const maxDuration = self.getMaxDuration();
+
+		return <div className="routeView">
 			Trips
-			{ self.state.trips.map(function(trip) {
-				var momentInstance = moment(trip.time).tz('America/New_York');
-				return <div key={trip.time} className="trip">
-					{ trip.durations.map(function(step, index) {
-						return <div 
-							key={index}
-							title={momentInstance.format('dddd, MMMM Do YYYY, h:mm a')}
-							className="step"
-							style={{
-								width: (step / 3) + 'px'
-							}}>
-						</div>;
-					}) }
-				</div>;
-			}) }
+			<ol className="trips">
+				{ self.state.trips.map(function(trip) {
+					var momentInstance = moment(trip.time.substr(0,19)).tz('America/New_York');
+					var tripDuration = trip.durations.reduce((prev, curr) => prev + curr);
+					return <li key={trip.time} className="trip">
+						<ol className="steps">
+							{ trip.durations.map(function(step, index) {
+								return <li 
+									key={index}
+									title={momentInstance.format('dddd, MMMM Do YYYY, h:mm a')}
+									className="step"
+									style={{
+										width: ((step * 100) / tripDuration) * (tripDuration / maxDuration) + '%'
+									}}>
+								</li>;
+							}) }
+						</ol>
+					</li>;
+				}) }
+			</ol>
 		</div>;
 	}
 });

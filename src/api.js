@@ -34,7 +34,7 @@ var getRoute = function(slug) {
 			order by "Trip".time asc, "BaseStep".index asc
 		`;
 
-		db.rawQuery(sql, ['pownal', 'home', '2016-09-08']).then(function(result) {
+		db.rawQuery(sql, ['pownal', 'home', '2016-09-16']).then(function(result) {
 			var tripTimesAdded = [];
 			var output = [];
 			result.rows.forEach(function(row) {
@@ -55,60 +55,6 @@ var getRoute = function(slug) {
 			console.error(error);
 			reject(error);
 		});
-
-
-
-
-
-
-
-
-			/*
-		pg.connect(conString, function(err, client, done) {
-			if (err) {
-				return reject('Error fetching client from pool', err);
-			}
-
-			var minSql = [
-				'select "Step".coords, min("Step".duration)',
-				'from "Route", "Trip", "Step"',
-				'where "Route".slug = $1',
-				'and "Trip".route = "Route".id',
-				'and "Step".trip = "Trip".id',
-				'group by coords',
-			].join(' ');
-
-			var sql = [
-				'select "Trip".id, "Trip".time, "Step".index, "Step".duration',
-				'from "Route", "Trip", "Step"',
-				'where "Route".slug = $1',
-				'and "Trip".route = "Route".id',
-				'and "Step".trip = "Trip".id',
-				'order by "Trip".time'
-			].join(' ');
-			client.query(sql, ['pownal'], function(err, result) {
-				done();
-				var output = {};
-				result.rows.forEach(function(row) {
-					if (output[row.id] === undefined) {
-						output[row.id] = {
-							time: row.time,
-							steps: []
-						};
-					}
-					output[row.id].steps.push({
-						index: row.index,
-						duration: row.duration
-					});
-				});
-				resolve(output);
-			}).catch(function(error) {
-				done();
-				reject(error);
-			});
-		});
-
-		*/
 
 	});
 };
