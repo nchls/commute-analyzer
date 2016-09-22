@@ -1,5 +1,5 @@
 var hapi = require('hapi');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 var api = require('./api');
 
