@@ -20,8 +20,8 @@ module.exports = React.createClass({
 			<ol>
 				{this.state.routes.map(function(route) {
 					return (
-						<li>
-							<a href={`/route/${route.slug}`}>{route.name}</a>
+						<li key={route.slug}>
+							<a href={`/commute/route/${route.slug}`}>{route.name}</a>
 						</li>
 					);
 				}) }
