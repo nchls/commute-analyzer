@@ -19,7 +19,7 @@ var getRoutes = function() {
 	});
 };
 
-var getRoute = function(slug) {
+var getRoute = function(slug, destination, ymd) {
 	return new Promise(function(resolve, reject) {
 
 		var sql = `
@@ -34,7 +34,7 @@ var getRoute = function(slug) {
 			order by "Trip".time asc, "BaseStep".index asc
 		`;
 
-		db.rawQuery(sql, ['pownal', 'home', '2016-09-16']).then(function(result) {
+		db.rawQuery(sql, [slug, destination, ymd]).then(function(result) {
 			var tripTimesAdded = [];
 			var output = [];
 			result.rows.forEach(function(row) {
