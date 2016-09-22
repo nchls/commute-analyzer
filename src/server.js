@@ -1,5 +1,5 @@
 var hapi = require('hapi');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 var api = require('./api');
 
@@ -14,7 +14,7 @@ var routeView = function(request, reply) {
 	// TODO: fix this for local dev
 	request.params.route = request.params.route.replace('commute-api/', '');
 
-	const now = moment();
+	const now = moment().tz('America/New_York');
 	const ymd = now.format('YYYY-MM-DD');
 	const isAfternoon = now.isAfter(moment().hours(12).minutes(0).seconds(0));
 	const destination = (isAfternoon ? 'home' : 'office');
