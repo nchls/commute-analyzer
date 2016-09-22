@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import { Link } from 'react-router';
 
 module.exports = React.createClass({
 	getInitialState: function() {
@@ -21,7 +22,7 @@ module.exports = React.createClass({
 				{this.state.routes.map(function(route) {
 					return (
 						<li key={route.slug}>
-							<a href={`/commute/route/${route.slug}`}>{route.name}</a>
+							<Link to={`/commute/route/${route.slug}`}>{route.name}</Link>
 						</li>
 					);
 				}) }
