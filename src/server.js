@@ -16,7 +16,7 @@ var routeView = function(request, reply) {
 
 	const now = moment().tz('America/New_York');
 	const ymd = now.format('YYYY-MM-DD');
-	const isAfternoon = now.isAfter(moment().hours(12).minutes(0).seconds(0));
+	const isAfternoon = now.isAfter(moment().tz('America/New_York').hours(12).minutes(0).seconds(0));
 	const destination = (isAfternoon ? 'home' : 'office');
 	api.getRoute(request.params.route, destination, ymd).then(function(routeResponse) {
 		reply(routeResponse);
@@ -26,7 +26,6 @@ var routeView = function(request, reply) {
 };
 
 var routesView = function(request, reply) {
-	console.log('routesView');
 	api.getRoutes().then(function(routesResponse) {
 		reply(routesResponse);
 	}).catch(function(error) {
