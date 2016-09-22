@@ -19,7 +19,10 @@ module.exports = {
 		proxy: {
 			'/commute-api/*': {
 				target: 'http://127.0.0.1:29090',
-				secure: false
+				pathRewrite: function(path, req) {
+					console.log('path', path);
+					return path.replace('/commute-api', '');
+				}
 			}
 		}
 	},

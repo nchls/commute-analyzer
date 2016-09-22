@@ -10,6 +10,10 @@ server.connection({
 });
 
 var routeView = function(request, reply) {
+
+	// TODO: fix this for local dev
+	request.params.route = request.params.route.replace('commute-api/', '');
+
 	const now = moment();
 	const ymd = now.format('YYYY-MM-DD');
 	const isAfternoon = now.isAfter(moment().hours(12).minutes(0).seconds(0));
@@ -22,6 +26,7 @@ var routeView = function(request, reply) {
 };
 
 var routesView = function(request, reply) {
+	console.log('routesView');
 	api.getRoutes().then(function(routesResponse) {
 		reply(routesResponse);
 	}).catch(function(error) {
@@ -31,16 +36,11 @@ var routesView = function(request, reply) {
 
 server.route({
 	method: 'GET',
-	path: '/',
-	handler: function(request, reply) {
-		api.getRoutes().then(function(routeResponse) {
-			reply(routeResponse);
-		}).catch(function(error) {
-			reply(error);
-		});
-	}
+	path: '/routes',
+	handler: routesView
 });
 
+// TODO: fix this for local dev
 server.route({
 	method: 'GET',
 	path: '/commute-api/routes',
@@ -49,7 +49,7 @@ server.route({
 
 server.route({
 	method: 'GET',
-	path: '/commute-api/{route*}',
+	path: '/{route*}',
 	handler: routeView
 });
 
