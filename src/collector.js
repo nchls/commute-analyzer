@@ -96,7 +96,7 @@ function mapStep(tripId, steps, timestamp) {
 				key: pvt.serverKey,
 				origin: origin,
 				destination: destination,
-				departure_time: timestamp
+				departure_time: 'now' // timestamp
 			}
 		}).then(function(response) {
 			var mappedRoute = response.data.routes[0];

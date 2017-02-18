@@ -11,7 +11,9 @@ module.exports = React.createClass({
 
 	componentWillMount: function() {
 		axios.get(`/commute-api/routes`).then(function(response) {
-			this.setState({routes: response.data});
+			if (response.data !== undefined) {
+				this.setState({routes: response.data});
+			}
 		}.bind(this));
 	},
 
@@ -19,7 +21,7 @@ module.exports = React.createClass({
 		const self = this;
 		return (
 			<ol>
-				{this.state.routes.map(function(route) {
+				{self.state.routes.map((route) => {
 					return (
 						<li key={route.slug}>
 							<Link to={`/commute/route/${route.slug}`}>{route.name}</Link>
