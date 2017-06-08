@@ -2,11 +2,14 @@ var axios = require('axios');
 
 var pvt = require('./private');
 var db = require('./db/db');
+var utils = require('./utils');
 var Route = require('./models/Route');
 var BaseTrip = require('./models/BaseTrip');
 var BaseStep = require('./models/BaseStep');
+var CalculationQueueItem = require('./models/CalculationQueueItem');
 
-init();
+//init();
+addStepsToCalculationQueue([30]);
 
 function init() {
 	getRoutes().then(function(routes) {
@@ -34,7 +37,7 @@ function initializeRoute(route) {
 		db.rawQuery(sql, [route.id, destinationType]).then(function(result) {
 			if (result.rows.length === 0) {
 				console.log('Base trip for route ' + route.id + ' and destination ' + destinationType + ' is missing!');
-				mapBaseRoute(route, destinationType);
+				mapBaseRoute(route, destinationType).then(addStepsToCalculationQueue);
 			} else {
 				console.log('Base trip for route ' + route.id + ' and destination ' + destinationType + ' already exists. Skipping.');
 			}
@@ -88,17 +91,52 @@ function mapBaseRoute(route, destinationType) {
 				});
 				db.insert(BaseStep, 'BaseStep', stepPayload)
 					.then(function(stepResult) {
-						console.log('Inserted new step IDs', stepResult.map(function(result) {
+						var baseStepIds = stepResult.map(function(result) {
 							return result.rows[0].id;
-						}));
+						});
+						console.log('Inserted new base step IDs', baseStepIds);
+						resolve(baseStepIds);
 					}).catch(function(error) {
 						console.error('Step insert failed!', error);
+						reject(error);
 					});
 			}).catch(function(error) {
 				console.error('Trip insert failed!', error);
+				reject(error);
 			});
 		}).catch(function(error) {
 			console.error('Google Maps API request failed!', error);
+			reject(error);
 		});			
 	});
+}
+
+function addStepsToCalculationQueue(baseStepIds) {
+	var rows = [];
+	var travelTimes = getTravelTimes();
+	baseStepIds.forEach(function(baseStepId) {
+		travelTimes.forEach(function(travelTime) {
+			rows.push({
+				baseStep: baseStepId,
+				timestamp: "date_trunc('minute'::text, \"" + travelTime + "\")"
+			});
+		});
+	});
+	db.insert(CalculationQueueItem, 'CalculationQueueItem', rows);
+}
+
+function getTravelTimes() {
+	var times = [];
+	var timeIndex = utils.morningStart.clone();
+	// 2017-04-21 19:28:00+00
+	while (timeIndex.isSameOrBefore(utils.morningEnd, 'minute')) {
+		times.push(timeIndex.format('YYYY-MM-DD HH:mm:ssZ'));
+		timeIndex.add(1, 'minutes');
+	}
+	timeIndex = utils.eveningStart.clone();
+	while (timeIndex.isSameOrBefore(utils.eveningEnd, 'minute')) {
+		times.push(timeIndex.format('YYYY-MM-DD HH:mm:ssZ'));
+		timeIndex.add(1, 'minutes');
+	}
+	return times;
 }

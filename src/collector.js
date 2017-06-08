@@ -4,16 +4,14 @@ var _ = require('lodash');
 
 var pvt = require('./private');
 var db = require('./db/db');
+var utils = require('./utils');
 var Route = require('./models/Route');
 var BaseTrip = require('./models/BaseTrip');
 var Trip = require('./models/Trip');
 var BaseStep = require('./models/BaseStep');
 var Step = require('./models/Step');
 
-var SECONDS_TO_GET_IN_YOUR_CAR_AND_START_DRIVING = 90;
 var VERBOSE = false;
-
-var TIMEZONE = 'America/New_York';
 
 var isMorning;
 var isEvening;
@@ -21,7 +19,7 @@ var isEvening;
 init();
 
 function init() {
-	var now = moment().tz(TIMEZONE),
+	var now = moment().tz(utils.TIMEZONE),
 		destinationType;
 	if (isInMorningCommuteWindow(now)) {
 		destinationType = 'office';
@@ -34,8 +32,7 @@ function init() {
 			_.forEach(routesAndBaseSteps, function(baseSteps, routeId) {
 				createTrip(routeId, destinationType).then(function(tripResult) {
 					var tripId = tripResult[0].rows[0].id;
-					var timestamp = new Date().getTime() + SECONDS_TO_GET_IN_YOUR_CAR_AND_START_DRIVING;
-					mapStep(tripId, baseSteps, timestamp).then(function(stepResult) {
+					mapStep(tripId, baseSteps).then(function(stepResult) {
 						// Steps mapped correctly
 					}).catch(function(error) {
 						logError('Error in step mapping', error);
@@ -83,7 +80,7 @@ function createTrip(routeId, destinationType) {
 	return db.insert(Trip, 'Trip', [tripPayload]);
 }
 
-function mapStep(tripId, steps, timestamp) {
+function mapStep(tripId, steps) {
 	return new Promise(function(resolve, reject) {
 		var step = steps.shift();
 		if (step === undefined) {
@@ -96,7 +93,7 @@ function mapStep(tripId, steps, timestamp) {
 				key: pvt.serverKey,
 				origin: origin,
 				destination: destination,
-				departure_time: 'now' // timestamp
+				departure_time: 'now'
 			}
 		}).then(function(response) {
 			var mappedRoute = response.data.routes[0];
@@ -112,7 +109,7 @@ function mapStep(tripId, steps, timestamp) {
 				duration: duration
 			}];
 			db.insert(Step, 'Step', stepPayload).then(function() {
-				mapStep(tripId, steps, timestamp).then(resolve).catch(function(error) {
+				mapStep(tripId, steps).then(resolve).catch(function(error) {
 					reject(error);
 				});
 			}).catch(function(error) {
@@ -126,31 +123,11 @@ function mapStep(tripId, steps, timestamp) {
 }
 
 function isInMorningCommuteWindow(momentInstance) {
-	var morningStart = moment().tz(TIMEZONE).set({
-		hour: 5,
-		minute: 0,
-		second: 0
-	});
-	var morningEnd = moment().tz(TIMEZONE).set({
-		hour: 9,
-		minute: 30,
-		second: 0
-	});
-	return momentInstance.isBetween(morningStart, morningEnd, null, '[]')
+	return momentInstance.isBetween(utils.morningStart, utils.morningEnd, null, '[]')
 }
 
 function isInEveningCommuteWindow(momentInstance) {
-	var eveningStart = moment().tz(TIMEZONE).set({
-		hour: 3 + 12,
-		minute: 0,
-		second: 0
-	});
-	var eveningEnd = moment().tz(TIMEZONE).set({
-		hour: 7 + 12,
-		minute: 30,
-		second: 0
-	});
-	return momentInstance.isBetween(eveningStart, eveningEnd, null, '[]')
+	return momentInstance.isBetween(utils.eveningStart, utils.eveningEnd, null, '[]')
 }
 
 function log() {
@@ -159,4 +136,3 @@ function log() {
 function logError() {
 	console.error('[' + moment().format() + '] ', Array.prototype.slice.call(arguments));
 }
-

@@ -14,6 +14,7 @@ var routeView = function(request, reply) {
 	// TODO: fix this for local dev
 	request.params.route = request.params.route.replace('commute-api/', '');
 
+	// '2017-03-24T20:00:00'
 	const now = moment().tz('America/New_York');
 	const ymd = now.format('YYYY-MM-DD');
 	const isAfternoon = now.isAfter(moment().tz('America/New_York').hours(12).minutes(0).seconds(0));

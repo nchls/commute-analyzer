@@ -10,7 +10,7 @@ module.exports = React.createClass({
 	},
 
 	componentWillMount: function() {
-		axios.get(`/commute-api/${'pownal'}`).then(function(response) {
+		axios.get(`/commute-api/${this.props.params.slug}`).then(function(response) {
 			this.setState({trips: response.data});
 		}.bind(this));
 	},
@@ -43,6 +43,7 @@ module.exports = React.createClass({
 								return <li 
 									key={index}
 									title={momentInstance.format('dddd, MMMM Do YYYY, h:mm a')}
+									data-duration={step + ' seconds'}
 									className="step"
 									style={{
 										width: ((step * 100) / tripDuration) * (tripDuration / maxDuration) + '%'

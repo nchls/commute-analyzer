@@ -23,7 +23,8 @@ var getRoute = function(slug, destination, ymd) {
 	return new Promise(function(resolve, reject) {
 
 		var sql = `
-			select "Trip".time, "Step".duration from "Step", "BaseStep", "BaseTrip", "Trip", "Route"
+			select date_trunc('minute', "Trip".time) as time, "Step".duration
+			from "Step", "BaseStep", "BaseTrip", "Trip", "Route"
 			where "Route".slug = $1
 			and "Trip".route = "Route".id
 			and "BaseStep".trip = "BaseTrip".id

@@ -5,12 +5,13 @@ var BaseTrip = require('../models/BaseTrip');
 var Trip = require('../models/Trip');
 var BaseStep = require('../models/BaseStep');
 var Step = require('../models/Step');
+var CalculationQueueItem = require('../models/CalculationQueueItem');
 
 
 init = function() {
 	var output = '';
 	
-	_.forEach([Route, BaseTrip, Trip, BaseStep, Step], function(model) {
+	_.forEach([Route, BaseTrip, Trip, BaseStep, Step, CalculationQueueItem], function(model) {
 		output += getSQL(model) + '\n';
 	})
 
