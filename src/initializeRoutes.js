@@ -8,8 +8,7 @@ var BaseTrip = require('./models/BaseTrip');
 var BaseStep = require('./models/BaseStep');
 var CalculationQueueItem = require('./models/CalculationQueueItem');
 
-//init();
-addStepsToCalculationQueue([30]);
+init();
 
 function init() {
 	getRoutes().then(function(routes) {
@@ -37,7 +36,7 @@ function initializeRoute(route) {
 		db.rawQuery(sql, [route.id, destinationType]).then(function(result) {
 			if (result.rows.length === 0) {
 				console.log('Base trip for route ' + route.id + ' and destination ' + destinationType + ' is missing!');
-				mapBaseRoute(route, destinationType).then(addStepsToCalculationQueue);
+				mapBaseRoute(route, destinationType);
 			} else {
 				console.log('Base trip for route ' + route.id + ' and destination ' + destinationType + ' already exists. Skipping.');
 			}
@@ -109,34 +108,4 @@ function mapBaseRoute(route, destinationType) {
 			reject(error);
 		});			
 	});
-}
-
-function addStepsToCalculationQueue(baseStepIds) {
-	var rows = [];
-	var travelTimes = getTravelTimes();
-	baseStepIds.forEach(function(baseStepId) {
-		travelTimes.forEach(function(travelTime) {
-			rows.push({
-				baseStep: baseStepId,
-				timestamp: "date_trunc('minute'::text, \"" + travelTime + "\")"
-			});
-		});
-	});
-	db.insert(CalculationQueueItem, 'CalculationQueueItem', rows);
-}
-
-function getTravelTimes() {
-	var times = [];
-	var timeIndex = utils.morningStart.clone();
-	// 2017-04-21 19:28:00+00
-	while (timeIndex.isSameOrBefore(utils.morningEnd, 'minute')) {
-		times.push(timeIndex.format('YYYY-MM-DD HH:mm:ssZ'));
-		timeIndex.add(1, 'minutes');
-	}
-	timeIndex = utils.eveningStart.clone();
-	while (timeIndex.isSameOrBefore(utils.eveningEnd, 'minute')) {
-		times.push(timeIndex.format('YYYY-MM-DD HH:mm:ssZ'));
-		timeIndex.add(1, 'minutes');
-	}
-	return times;
 }
