@@ -10,6 +10,7 @@ var BaseTrip = require('./models/BaseTrip');
 var Trip = require('./models/Trip');
 var BaseStep = require('./models/BaseStep');
 var Step = require('./models/Step');
+var CalculationQueueItem = require('./models/CalculationQueueItem');
 
 var VERBOSE = false;
 
@@ -30,15 +31,19 @@ function init() {
 	if (destinationType !== undefined) {
 		getRoutesAndBaseSteps(destinationType).then(function(routesAndBaseSteps) {
 			_.forEach(routesAndBaseSteps, function(baseSteps, routeId) {
-				createTrip(routeId, destinationType).then(function(tripResult) {
-					var tripId = tripResult[0].rows[0].id;
-					mapStep(tripId, baseSteps).then(function(stepResult) {
-						// Steps mapped correctly
-					}).catch(function(error) {
-						logError('Error in step mapping', error);
-					});
-				}).catch(function(error) {
-					logError('Error in trip creation', error);
+				isTimeSelected(routeId, now).then((isSelected) => {
+					if (isSelected) {
+						createTrip(routeId, destinationType).then(function(tripResult) {
+							var tripId = tripResult[0].rows[0].id;
+							mapStep(tripId, baseSteps).then(function(stepResult) {
+								// Steps mapped correctly
+							}).catch(function(error) {
+								logError('Error in step mapping', error);
+							});
+						}).catch(function(error) {
+							logError('Error in trip creation', error);
+						});
+					}
 				});
 			});
 		}).catch(function(error) {
@@ -67,6 +72,21 @@ function getRoutesAndBaseSteps(destinationType) {
 			resolve(output);
 		}).catch(function(error) {
 			reject(error);
+		});
+	});
+}
+
+function isTimeSelected(routeId, time) {
+	return new Promise((resolve, reject) => {
+		const dbTime = time.add(30, 'seconds').startOf('minute').format('HH:mm:ss+00');
+		db.query(CalculationQueueItem, 'CalculationQueueItem', ['selected'], {
+			route: routeId,
+			time: dbTime
+		}).then((result) => {
+			if (result.rows.length === 0) {
+				resolve(false);
+			}
+			resolve(result.rows[0].selected);
 		});
 	});
 }

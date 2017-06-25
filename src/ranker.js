@@ -5,7 +5,9 @@ const CalculationQueueItem = require('./models/CalculationQueueItem');
 
 const GOOGLE_DAILY_QUOTA = 2500
 
-const ranker = () => {
+ranker();
+
+function ranker() {
 	const minutes = getMinutesInCommuteWindows();
 
 	const routesPromise = getRoutesAndStepCounts();
@@ -103,7 +105,7 @@ const ranker = () => {
 			db.rawQuery('delete from "CalculationQueueItem"').then(() => {
 
 				db.rawQuery(query, parameters).then((result) => {
-					console.log('Success!');
+					process.exit();
 				}).catch(console.error);
 
 			}).catch(console.error);
@@ -111,9 +113,9 @@ const ranker = () => {
 		}).catch(console.error);
 
 	}).catch(console.error);
-};
+}
 
-const getMinutesInCommuteWindows = () => {
+function getMinutesInCommuteWindows() {
 	const minutes = [];
 	let timeOfDay = utils.morningStart.clone();
 	while (timeOfDay.isBefore(utils.morningEnd)) {
@@ -126,9 +128,9 @@ const getMinutesInCommuteWindows = () => {
 		timeOfDay.add(1, 'minutes');
 	}
 	return minutes;
-};
+}
 
-const getRoutesAndStepCounts = () => {
+function getRoutesAndStepCounts() {
 	const sql = `
 		select r.id, bt."destinationType", count(bs.id) from "Route" r
 		join "BaseTrip" bt on bt.route = r.id
@@ -137,9 +139,9 @@ const getRoutesAndStepCounts = () => {
 	`;
 
 	return db.rawQuery(sql, []);
-};
+}
 
-const getCalculationCountsbyRouteAndTime = () => {
+function getCalculationCountsbyRouteAndTime() {
 	const sql = `
 		select timeresults, count(*) from (
 			select "Route".id, "time"(date_trunc('minute', "time")) as time 
@@ -152,6 +154,4 @@ const getCalculationCountsbyRouteAndTime = () => {
 	`;
 
 	return db.rawQuery(sql, []);
-};
-
-module.exports = ranker;
+}
