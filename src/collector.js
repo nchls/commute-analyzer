@@ -143,11 +143,11 @@ function mapStep(tripId, steps) {
 }
 
 function isInMorningCommuteWindow(momentInstance) {
-	return momentInstance.isBetween(utils.morningStart, utils.morningEnd, null, '[]')
+	return momentInstance.isBetween(utils.morningStart, utils.morningEnd, 'minute', '[]')
 }
 
 function isInEveningCommuteWindow(momentInstance) {
-	return momentInstance.isBetween(utils.eveningStart, utils.eveningEnd, null, '[]')
+	return momentInstance.isBetween(utils.eveningStart, utils.eveningEnd, 'minute', '[]')
 }
 
 function log() {
