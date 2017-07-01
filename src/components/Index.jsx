@@ -10,7 +10,7 @@ module.exports = React.createClass({
 	},
 
 	componentWillMount: function() {
-		axios.get(`/commute-api/routes`).then(function(response) {
+		axios.get(`/commute/api/routes`).then(function(response) {
 			if (response.data !== undefined) {
 				this.setState({routes: response.data});
 			}

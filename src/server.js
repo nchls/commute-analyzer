@@ -1,4 +1,5 @@
 var hapi = require('hapi');
+var inert = require('inert');
 var moment = require('moment-timezone');
 
 var api = require('./api');
@@ -6,15 +7,10 @@ var api = require('./api');
 var server = new hapi.Server();
 
 server.connection({
-	port: 29090
+	port: 8080
 });
 
 var routeView = function(request, reply) {
-
-	// TODO: fix this for local dev
-	request.params.route = request.params.route.replace('commute-api/', '');
-
-	// '2017-03-24T20:00:00'
 	const now = moment().tz('America/New_York');
 	const ymd = now.format('YYYY-MM-DD');
 	const isAfternoon = now.isAfter(moment().tz('America/New_York').hours(12).minutes(0).seconds(0));
@@ -34,25 +30,37 @@ var routesView = function(request, reply) {
 	});
 };
 
-server.route({
-	method: 'GET',
-	path: '/routes',
-	handler: routesView
+server.register(inert, function(err) {
+
+	if (err) {
+		throw err;
+	}
+
+	server.route({
+		method: 'GET',
+		path: '/commute/api/routes',
+		handler: routesView
+	});
+
+	server.route({
+		method: 'GET',
+		path: '/commute/api/route/{route*}',
+		handler: routeView
+	});
+
+	server.route({
+		method: 'GET',
+		path: '/{path*}',
+		handler: {
+			directory: {
+				path: 'dist'
+			}
+		}
+	});
+
+	server.start(function() {
+		console.log('Server running at:', server.info.uri);
+	});
+
 });
 
-// TODO: fix this for local dev
-server.route({
-	method: 'GET',
-	path: '/commute-api/routes',
-	handler: routesView
-});
-
-server.route({
-	method: 'GET',
-	path: '/{route*}',
-	handler: routeView
-});
-
-server.start(function() {
-	console.log('Server running at:', server.info.uri);
-});
