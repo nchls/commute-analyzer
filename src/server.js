@@ -7,7 +7,7 @@ var api = require('./api');
 var server = new hapi.Server();
 
 server.connection({
-	port: 8080
+	port: 29090
 });
 
 var routeView = function(request, reply) {
