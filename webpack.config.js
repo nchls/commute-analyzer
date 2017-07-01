@@ -10,6 +10,7 @@ module.exports = {
 		filename: 'bundle.js'
 	},
 	plugins: [
+		new webpack.optimize.ModuleConcatenationPlugin(),
 		new htmlPlugin({
 			template: 'app.html',
 			filename: path.join(__dirname, 'dist', 'commute', 'index.html')
