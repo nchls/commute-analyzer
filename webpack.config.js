@@ -6,14 +6,14 @@ module.exports = {
 	context: path.join(__dirname, 'src'),
 	entry: path.join(__dirname, 'src', 'app.js'),
 	output: {
-		path: path.join(__dirname, 'dist', 'commute'),
-		filename: 'bundle.js'
+		path: path.join(__dirname, 'dist'),
+		filename: '/commute/static/bundle.js'
 	},
 	plugins: [
 		new webpack.optimize.ModuleConcatenationPlugin(),
 		new htmlPlugin({
 			template: 'app.html',
-			filename: path.join(__dirname, 'dist', 'commute', 'index.html')
+			filename: path.join(__dirname, 'dist', 'index.html')
 		})
 	],
 	devtool: 'sourcemap',

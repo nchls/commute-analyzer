@@ -38,23 +38,31 @@ server.register(inert, function(err) {
 
 	server.route({
 		method: 'GET',
-		path: '/commute/api/routes',
+		path: '/api/routes',
 		handler: routesView
 	});
 
 	server.route({
 		method: 'GET',
-		path: '/commute/api/route/{route*}',
+		path: '/api/route/{route*}',
 		handler: routeView
 	});
 
 	server.route({
 		method: 'GET',
-		path: '/{path*}',
+		path: '/static/{path*}',
 		handler: {
 			directory: {
 				path: 'dist'
 			}
+		}
+	});
+
+	server.route({
+		method: 'GET',
+		path: '/{path*}',
+		handler: function(request, reply) {
+			reply.file('./dist/index.html');
 		}
 	});
 
