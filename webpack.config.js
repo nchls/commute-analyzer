@@ -7,7 +7,7 @@ module.exports = {
 	entry: path.join(__dirname, 'src', 'app.js'),
 	output: {
 		path: path.join(__dirname, 'dist'),
-		filename: '/commute/static/bundle.js'
+		filename: 'bundle.js'
 	},
 	plugins: [
 		new webpack.optimize.ModuleConcatenationPlugin(),

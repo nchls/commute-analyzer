@@ -10,7 +10,7 @@ module.exports = React.createClass({
 	},
 
 	componentWillMount: function() {
-		axios.get(`/commute/api/route/${this.props.params.slug}`).then(function(response) {
+		axios.get(`/api/route/${this.props.params.slug}`).then(function(response) {
 			this.setState({trips: response.data});
 		}.bind(this));
 	},

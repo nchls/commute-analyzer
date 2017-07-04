@@ -50,11 +50,9 @@ server.register(inert, function(err) {
 
 	server.route({
 		method: 'GET',
-		path: '/static/{path*}',
-		handler: {
-			directory: {
-				path: 'dist'
-			}
+		path: '/bundle.js',
+		handler: function(request, reply) {
+			reply.file('./dist/bundle.js');
 		}
 	});
 
