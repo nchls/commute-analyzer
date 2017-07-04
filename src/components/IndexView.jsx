@@ -1,23 +1,24 @@
 import React from 'react';
 import axios from 'axios';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
-module.exports = React.createClass({
-	getInitialState: function() {
-		return {
+class IndexView extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
 			routes: []
 		};
-	},
+	}
 
-	componentWillMount: function() {
+	componentDidMount() {
 		axios.get(`/api/routes`).then(function(response) {
 			if (response.data !== undefined) {
 				this.setState({routes: response.data});
 			}
 		}.bind(this));
-	},
+	}
 
-	render: function() {
+	render() {
 		const self = this;
 		return (
 			<ol>
@@ -31,4 +32,6 @@ module.exports = React.createClass({
 			</ol>
 		);
 	}
-});
+}
+
+export default IndexView;

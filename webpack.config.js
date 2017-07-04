@@ -17,7 +17,7 @@ module.exports = {
 			filename: path.join(__dirname, 'dist', 'index.html')
 		})
 	],
-	devtool: 'sourcemap',
+	devtool: 'source-map',
 	module: {
 		loaders: [
 			{

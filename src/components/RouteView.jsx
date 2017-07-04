@@ -2,20 +2,21 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 
-module.exports = React.createClass({
-	getInitialState: function() {
-		return {
+class RouteView extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
 			trips: []
 		};
-	},
-
-	componentWillMount: function() {
-		axios.get(`/api/route/${this.props.params.slug}`).then(function(response) {
+	}
+	
+	componentDidMount() {
+		axios.get(`/api/route/${this.props.match.params.slug}`).then(function(response) {
 			this.setState({trips: response.data});
 		}.bind(this));
-	},
+	}
 
-	getMaxDuration: function() {
+	getMaxDuration() {
 		let maxDuration = 0;
 		this.state.trips.forEach((trip) => {
 			const totalDuration = trip.durations.reduce((prev, curr) => prev + curr);
@@ -24,9 +25,9 @@ module.exports = React.createClass({
 			}
 		});
 		return maxDuration;
-	},
+	}
 
-	render: function() {
+	render() {
 		const self = this;
 
 		const maxDuration = self.getMaxDuration();
@@ -56,4 +57,6 @@ module.exports = React.createClass({
 			</ol>
 		</div>;
 	}
-});
+}
+
+export default RouteView;

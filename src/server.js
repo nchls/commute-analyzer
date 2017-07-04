@@ -58,6 +58,14 @@ server.register(inert, function(err) {
 
 	server.route({
 		method: 'GET',
+		path: '/bundle.js.map',
+		handler: function(request, reply) {
+			reply.file('./dist/bundle.js.map');
+		}
+	});
+
+	server.route({
+		method: 'GET',
 		path: '/{path*}',
 		handler: function(request, reply) {
 			reply.file('./dist/index.html');

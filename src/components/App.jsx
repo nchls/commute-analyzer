@@ -1,15 +1,19 @@
 import React from 'react';
+import { Route } from 'react-router-dom';
 
-module.exports = React.createClass({
-	componentWillMount: function() {
+import IndexView from './IndexView.jsx';
+import RouteView from './RouteView.jsx';
 
-	},
-	render: function() {
+class App extends React.Component {
+	render() {
 		return <div>
 			<h1>Commute Analyzer</h1>
 			<div>
-				{this.props.children}
+				<Route exact path="/" component={ IndexView }/>
+				<Route path="/route/:slug" component={ RouteView }/>
 			</div>
 		</div>;
 	}
-});
+}
+
+export default App;
