@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
+import classNames from 'classnames';
 
 class RouteView extends React.Component {
 	constructor(props) {
@@ -36,14 +37,20 @@ class RouteView extends React.Component {
 			Trips
 			<ol className="trips">
 				{ self.state.trips.map(function(trip) {
-					var momentInstance = moment(trip.time.substr(0,19)).tz('America/New_York');
+					var momentInstance = moment(trip.time, 'HH:mm:ss');
 					var tripDuration = trip.durations.reduce((prev, curr) => prev + curr);
-					return <li key={trip.time} className="trip">
+					return <li 
+						key={trip.time} 
+						className={ classNames(
+							'trip', 
+							{ actual: trip.isActual }
+						) }
+						title={momentInstance.format('dddd, MMMM Do YYYY, h:mm a')}
+					>
 						<ol className="steps">
 							{ trip.durations.map(function(step, index) {
 								return <li 
 									key={index}
-									title={momentInstance.format('dddd, MMMM Do YYYY, h:mm a')}
 									data-duration={step + ' seconds'}
 									className="step"
 									style={{
