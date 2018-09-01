@@ -1,38 +1,34 @@
-var pg = require('pg'),
+var { Pool } = require('pg'),
 	q = require('q'),
 	_ = require('lodash');
 
 var private = require('../private');
 
-var conString = 'postgres://' + private.db.user + ':' + private.db.pass + '@' + private.db.host + '/' + private.db.name;
+const pool = new Pool({
+	host: private.db.host,
+	database: private.db.name,
+	user: private.db.user,
+	password: private.db.pass
+});
 
 var runInsertOrUpdate = function(model, rows) {
 	var deferred = q.defer();
 
-	pg.connect(conString, function(err, client, done) {
-		if (err) {
-			return deferred.reject('Error fetching client from pool', err);
-		}
+	var rowsCount = rows.length;
+	var results = [];
 
-		var rowsCount = rows.length;
-		var results = [];
+	rows.forEach(function(row) {
+		pool.query(row.sql, row.parameters, function(err, result) {
+			if (err) {
+				deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
+			}
+			result = formatPgData(model, result);
+			results.push(result);
 
-		rows.forEach(function(row) {
-			client.query(row.sql, row.parameters, function(err, result) {
-				if (err) {
-					deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
-				}
-				result = formatPgData(model, result);
-				results.push(result);
-
-				if (results.length === rowsCount) {
-					done();
-					deferred.resolve(results);
-				}
-			});
-
+			if (results.length === rowsCount) {
+				deferred.resolve(results);
+			}
 		});
-
 	});
 
 	return deferred.promise;
@@ -40,21 +36,12 @@ var runInsertOrUpdate = function(model, rows) {
 
 rawQuery = function(sql, parameters) {
 	return new Promise(function(resolve, reject) {
-		pg.connect(conString, function(err, client, done) {
+		pool.query(sql, parameters, function(err, result) {
 			if (err) {
-				return reject('Error fetching client from pool', err);
+				console.log('err', err, 'result', result);
+				return reject(err);
 			}
-			client.query(sql, parameters, function(err, result) {
-				done();
-				if (err) {
-					console.log('err', err, 'result', result);
-					return reject(err);
-				}
-				resolve(result);
-			}).catch(function(error) {
-				done();
-				reject(error);
-			});
+			resolve(result);
 		});
 	});
 };
@@ -62,37 +49,28 @@ rawQuery = function(sql, parameters) {
 query = function(model, table, columns, criteria) {
 	var deferred = q.defer();
 
-	pg.connect(conString, function(err, client, done) {
+	var whereClause;
+	var parameters;
+	if (criteria !== undefined) {
+		whereClause = objToSetOrWhereClause(criteria, 'where');
+		var parameterizedWhereClause = parameterizeClauses([whereClause]);
+		whereClause = ' where ' + parameterizedWhereClause[0];
+		parameters = parameterizedWhereClause[1];
+	} else {
+		whereClause = '';
+		parameters = [];
+	}
+
+	var sql = 'select ' + columns.join(',') + ' from "' + table + '"' + whereClause;
+
+	pool.query(sql, parameters, function(err, result) {
 		if (err) {
 			console.error(err);
-			return deferred.reject('Error fetching client from pool', err);
-		}
-
-		var whereClause;
-		var parameters;
-		if (criteria !== undefined) {
-			whereClause = objToSetOrWhereClause(criteria, 'where');
-			var parameterizedWhereClause = parameterizeClauses([whereClause]);
-			whereClause = ' where ' + parameterizedWhereClause[0];
-			parameters = parameterizedWhereClause[1];
+			return deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
 		} else {
-			whereClause = '';
-			parameters = [];
+			result = formatPgData(model, result);
+			return deferred.resolve(result);
 		}
-
-		var sql = 'select ' + columns.join(',') + ' from "' + table + '"' + whereClause;
-
-		client.query(sql, parameters, function(err, result) {
-			done();
-			if (err) {
-				console.error(err);
-				return deferred.reject(JSON.stringify({msg: 'Error running query', err: err}));
-			} else {
-				result = formatPgData(model, result);
-				return deferred.resolve(result);
-			}
-		});
-
 	});
 
 	return deferred.promise;

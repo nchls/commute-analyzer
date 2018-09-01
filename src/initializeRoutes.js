@@ -23,14 +23,13 @@ function getRoutes() {
 }
 
 function initializeRoute(route) {
-	var sql = [
-		'select "BaseStep".index, "BaseStep"."startLat", "BaseStep"."startLon", "BaseStep"."endLat", "BaseStep"."endLon"',
-		'from "Route", "BaseTrip", "BaseStep"',
-		'where "Route".id = $1',
-		'and "BaseTrip"."destinationType" = $2',
-		'and "BaseTrip".route = "Route".id',
-		'and "BaseStep".trip = "BaseTrip".id'
-	].join(' ');
+	var sql = `
+		select "BaseStep".index, "BaseStep"."startLat", "BaseStep"."startLon", "BaseStep"."endLat", "BaseStep"."endLon"
+		from "Route"
+		join "BaseTrip" on "BaseTrip".route = $1
+		join "BaseStep" on "BaseStep".trip = "BaseTrip".id
+		where "BaseTrip"."destinationType" = $2
+	`;
 
 	['office', 'home'].forEach(function(destinationType) {
 		db.rawQuery(sql, [route.id, destinationType]).then(function(result) {

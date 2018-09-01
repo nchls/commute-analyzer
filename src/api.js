@@ -5,10 +5,6 @@ var Route = require('./models/Route');
 var Trip = require('./models/Trip');
 var Step = require('./models/Step');
 
-var pg = require('pg')
-var private = require('./private');
-var conString = 'postgres://' + private.db.user + ':' + private.db.pass + '@' + private.db.host + '/' + private.db.name;
-
 var getRoutes = function() {
 	return new Promise(function(resolve, reject) {
 		db.query(Route, 'Route', ['name', 'slug']).then(function(response) {
