@@ -11,7 +11,6 @@ module.exports = {
 		filename: 'bundle.js'
 	},
 	plugins: [
-		new webpack.optimize.ModuleConcatenationPlugin(),
 		new htmlPlugin({
 			template: 'app.html',
 			filename: path.join(__dirname, 'dist', 'index.html')
@@ -19,11 +18,7 @@ module.exports = {
 	],
 	devtool: 'source-map',
 	module: {
-		loaders: [
-			{
-				test: /\.json$/, 
-				loader: 'json-loader'
-			},
+		rules: [
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
